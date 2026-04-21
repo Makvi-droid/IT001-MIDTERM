@@ -1,0 +1,1414 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CyberSec & Web Dev Quiz</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0a0e1a;
+        --panel: #0f1628;
+        --border: #1e3a5f;
+        --accent: #00d4ff;
+        --accent2: #ff6b35;
+        --correct: #00ff88;
+        --wrong: #ff3860;
+        --text: #c8d8e8;
+        --text-dim: #5a7a9a;
+        --glow: 0 0 20px rgba(0, 212, 255, 0.3);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background-color: var(--bg);
+        background-image:
+          radial-gradient(
+            ellipse at 20% 20%,
+            rgba(0, 80, 140, 0.15) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse at 80% 80%,
+            rgba(255, 107, 53, 0.08) 0%,
+            transparent 50%
+          );
+        color: var(--text);
+        font-family: "Rajdhani", sans-serif;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+      }
+
+      /* Grid lines background */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+        background-size: 40px 40px;
+        pointer-events: none;
+      }
+
+      .quiz-wrapper {
+        width: 100%;
+        max-width: 760px;
+      }
+
+      /* Header */
+      .quiz-header {
+        text-align: center;
+        margin-bottom: 28px;
+      }
+      .quiz-header .tag {
+        font-family: "Share Tech Mono", monospace;
+        color: var(--accent);
+        font-size: 0.75rem;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+      }
+      .quiz-header h1 {
+        font-size: clamp(1.6rem, 5vw, 2.4rem);
+        font-weight: 700;
+        letter-spacing: 2px;
+        color: #fff;
+        text-transform: uppercase;
+        line-height: 1.1;
+      }
+      .quiz-header h1 span {
+        color: var(--accent);
+        text-shadow: var(--glow);
+      }
+
+      /* Card */
+      .quiz-card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: clamp(20px, 5vw, 36px);
+        position: relative;
+        box-shadow:
+          0 0 40px rgba(0, 0, 0, 0.5),
+          inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      }
+      .quiz-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--accent),
+          transparent
+        );
+        border-radius: 12px 12px 0 0;
+      }
+
+      /* Progress bar */
+      .progress-bar-wrap {
+        margin-bottom: 20px;
+      }
+      .progress-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      .q-counter {
+        font-family: "Share Tech Mono", monospace;
+        color: var(--accent);
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+      }
+      .score-live {
+        font-family: "Share Tech Mono", monospace;
+        color: var(--text-dim);
+        font-size: 0.85rem;
+      }
+      .progress-track {
+        height: 4px;
+        background: rgba(255, 255, 255, 0.07);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent), #0090b8);
+        border-radius: 2px;
+        transition: width 0.4s ease;
+        box-shadow: 0 0 8px var(--accent);
+      }
+
+      /* Category badge */
+      .cat-badge {
+        display: inline-block;
+        font-family: "Share Tech Mono", monospace;
+        font-size: 0.68rem;
+        letter-spacing: 2px;
+        color: var(--accent2);
+        border: 1px solid rgba(255, 107, 53, 0.3);
+        padding: 3px 10px;
+        border-radius: 2px;
+        margin-bottom: 14px;
+        text-transform: uppercase;
+      }
+
+      /* Question text */
+      .question-text {
+        font-size: clamp(1rem, 2.5vw, 1.2rem);
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 22px;
+        line-height: 1.55;
+        min-height: 3em;
+      }
+
+      /* Options */
+      .options-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+      @media (max-width: 520px) {
+        .options-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .option-btn {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 14px 16px;
+        color: var(--text);
+        font-family: "Rajdhani", sans-serif;
+        font-size: 0.95rem;
+        font-weight: 600;
+        text-align: left;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        line-height: 1.4;
+      }
+      .option-btn:hover:not(:disabled) {
+        border-color: var(--accent);
+        background: rgba(0, 212, 255, 0.06);
+        color: #fff;
+        transform: translateY(-1px);
+      }
+      .option-btn .opt-letter {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 0.75rem;
+        color: var(--accent);
+        background: rgba(0, 212, 255, 0.1);
+        padding: 2px 7px;
+        border-radius: 3px;
+        flex-shrink: 0;
+        margin-top: 1px;
+      }
+      .option-btn.correct {
+        border-color: var(--correct);
+        background: rgba(0, 255, 136, 0.08);
+        color: var(--correct);
+      }
+      .option-btn.correct .opt-letter {
+        color: var(--correct);
+        background: rgba(0, 255, 136, 0.15);
+      }
+      .option-btn.wrong {
+        border-color: var(--wrong);
+        background: rgba(255, 56, 96, 0.08);
+        color: var(--wrong);
+      }
+      .option-btn.wrong .opt-letter {
+        color: var(--wrong);
+        background: rgba(255, 56, 96, 0.15);
+      }
+      .option-btn:disabled {
+        cursor: not-allowed;
+        opacity: 0.7;
+      }
+
+      /* Feedback */
+      .feedback-area {
+        min-height: 40px;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .feedback-icon {
+        font-size: 1.3rem;
+      }
+      .feedback-msg {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 0.82rem;
+        line-height: 1.4;
+      }
+      .feedback-msg.correct {
+        color: var(--correct);
+      }
+      .feedback-msg.wrong {
+        color: var(--wrong);
+      }
+
+      /* Next / Restart buttons */
+      .action-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .btn-next {
+        background: var(--accent);
+        color: #000;
+        border: none;
+        border-radius: 6px;
+        padding: 12px 28px;
+        font-family: "Rajdhani", sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 0 16px rgba(0, 212, 255, 0.3);
+      }
+      .btn-next:hover {
+        background: #00b8d9;
+        transform: translateY(-1px);
+      }
+      .btn-next:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .btn-restart {
+        background: transparent;
+        color: var(--text-dim);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 11px 18px;
+        font-family: "Rajdhani", sans-serif;
+        font-size: 0.9rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .btn-restart:hover {
+        border-color: var(--accent2);
+        color: var(--accent2);
+      }
+
+      /* Results screen */
+      #results-screen {
+        display: none;
+      }
+      .results-card {
+        text-align: center;
+        padding: 10px 0;
+      }
+      .results-title {
+        font-family: "Share Tech Mono", monospace;
+        color: var(--accent);
+        font-size: 0.75rem;
+        letter-spacing: 4px;
+        margin-bottom: 10px;
+      }
+      .score-display {
+        font-size: clamp(3rem, 12vw, 5.5rem);
+        font-weight: 700;
+        color: #fff;
+        line-height: 1;
+        margin-bottom: 4px;
+      }
+      .score-display span {
+        color: var(--accent);
+        text-shadow: var(--glow);
+      }
+      .score-label {
+        color: var(--text-dim);
+        font-size: 1rem;
+        margin-bottom: 24px;
+      }
+      .score-ring-wrap {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 24px;
+      }
+      .score-ring {
+        position: relative;
+        width: 140px;
+        height: 140px;
+      }
+      .score-ring svg {
+        transform: rotate(-90deg);
+      }
+      .score-ring-text {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .ring-pct {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #fff;
+      }
+      .ring-sub {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 0.65rem;
+        color: var(--text-dim);
+        letter-spacing: 2px;
+      }
+      .verdict {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        letter-spacing: 1px;
+      }
+      .verdict-sub {
+        color: var(--text-dim);
+        font-size: 0.9rem;
+        margin-bottom: 28px;
+      }
+      .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 28px;
+      }
+      .stat-box {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 14px 8px;
+      }
+      .stat-val {
+        font-size: 1.6rem;
+        font-weight: 700;
+      }
+      .stat-val.c {
+        color: var(--correct);
+      }
+      .stat-val.w {
+        color: var(--wrong);
+      }
+      .stat-val.a {
+        color: var(--accent);
+      }
+      .stat-lbl {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 0.65rem;
+        letter-spacing: 1px;
+        color: var(--text-dim);
+        margin-top: 3px;
+      }
+      .btn-restart-big {
+        background: var(--accent);
+        color: #000;
+        border: none;
+        border-radius: 6px;
+        padding: 14px 40px;
+        font-family: "Rajdhani", sans-serif;
+        font-size: 1.05rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+      }
+      .btn-restart-big:hover {
+        background: #00b8d9;
+        transform: translateY(-2px);
+      }
+
+      /* Start screen */
+      #start-screen {
+        display: block;
+      }
+      .start-card {
+        text-align: center;
+        padding: 10px 0;
+      }
+      .start-card .topics {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+        margin-bottom: 28px;
+      }
+      .topic-pill {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 0.68rem;
+        letter-spacing: 1px;
+        color: var(--text-dim);
+        border: 1px solid var(--border);
+        padding: 5px 12px;
+        border-radius: 20px;
+      }
+      .info-row {
+        display: flex;
+        justify-content: center;
+        gap: 28px;
+        margin-bottom: 28px;
+        flex-wrap: wrap;
+      }
+      .info-item {
+        text-align: center;
+      }
+      .info-num {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--accent);
+        line-height: 1;
+      }
+      .info-lbl {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 0.65rem;
+        letter-spacing: 2px;
+        color: var(--text-dim);
+      }
+      .btn-start {
+        background: var(--accent);
+        color: #000;
+        border: none;
+        border-radius: 6px;
+        padding: 15px 50px;
+        font-family: "Rajdhani", sans-serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 0 24px rgba(0, 212, 255, 0.4);
+      }
+      .btn-start:hover {
+        background: #00b8d9;
+        transform: translateY(-2px);
+        box-shadow: 0 0 32px rgba(0, 212, 255, 0.5);
+      }
+
+      /* Animate in */
+      @keyframes fadeSlide {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .quiz-card {
+        animation: fadeSlide 0.35s ease;
+      }
+
+      /* Scan line effect on correct */
+      @keyframes scanline {
+        0% {
+          top: 0;
+          opacity: 0.6;
+        }
+        100% {
+          top: 100%;
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="quiz-wrapper">
+      <div class="quiz-header">
+        <div class="tag">&gt;_ KNOWLEDGE_CHECK.exe</div>
+        <h1>Cyber<span>Sec</span> &amp; Web Dev<br />Quiz</h1>
+      </div>
+
+      <!-- START SCREEN -->
+      <div class="quiz-card" id="start-screen">
+        <div class="start-card">
+          <p
+            style="
+              color: var(--text-dim);
+              font-size: 0.95rem;
+              margin-bottom: 20px;
+              line-height: 1.6;
+            "
+          >
+            Test your knowledge on network security, hacking techniques, the
+            dark web, and web development fundamentals.
+          </p>
+          <div class="topics">
+            <span class="topic-pill">Packet Sniffing</span>
+            <span class="topic-pill">ARP Poisoning</span>
+            <span class="topic-pill">Denial of Service</span>
+            <span class="topic-pill">Wireless Hacking</span>
+            <span class="topic-pill">Dark Web / Tor</span>
+            <span class="topic-pill">Web Development</span>
+          </div>
+          <div class="info-row">
+            <div class="info-item">
+              <div class="info-num">50</div>
+              <div class="info-lbl">QUESTIONS</div>
+            </div>
+            <div class="info-item">
+              <div class="info-num">4</div>
+              <div class="info-lbl">CHOICES EACH</div>
+            </div>
+            <div class="info-item">
+              <div class="info-num">∞</div>
+              <div class="info-lbl">ATTEMPTS</div>
+            </div>
+          </div>
+          <button class="btn-start" onclick="startQuiz()">
+            INITIALIZE QUIZ
+          </button>
+        </div>
+      </div>
+
+      <!-- QUIZ SCREEN -->
+      <div class="quiz-card" id="quiz-screen" style="display: none">
+        <div class="progress-bar-wrap">
+          <div class="progress-meta">
+            <span class="q-counter" id="q-counter">Q 01 / 50</span>
+            <span class="score-live" id="score-live">SCORE: 0</span>
+          </div>
+          <div class="progress-track">
+            <div
+              class="progress-fill"
+              id="progress-fill"
+              style="width: 2%"
+            ></div>
+          </div>
+        </div>
+
+        <div class="cat-badge" id="cat-badge">CATEGORY</div>
+        <div class="question-text" id="question-text">Loading...</div>
+
+        <div class="options-grid" id="options-grid"></div>
+
+        <div class="feedback-area" id="feedback-area"></div>
+
+        <div class="action-row">
+          <button class="btn-restart" onclick="confirmRestart()">
+            ↺ RESTART
+          </button>
+          <button
+            class="btn-next"
+            id="btn-next"
+            onclick="nextQuestion()"
+            disabled
+          >
+            NEXT →
+          </button>
+        </div>
+      </div>
+
+      <!-- RESULTS SCREEN -->
+      <div class="quiz-card" id="results-screen">
+        <div class="results-card">
+          <div class="results-title">// QUIZ_COMPLETE</div>
+          <div class="score-ring-wrap">
+            <div class="score-ring">
+              <svg width="140" height="140" viewBox="0 0 140 140">
+                <circle
+                  cx="70"
+                  cy="70"
+                  r="58"
+                  fill="none"
+                  stroke="rgba(255,255,255,0.05)"
+                  stroke-width="10"
+                />
+                <circle
+                  cx="70"
+                  cy="70"
+                  r="58"
+                  fill="none"
+                  stroke="var(--accent)"
+                  stroke-width="10"
+                  stroke-linecap="round"
+                  stroke-dasharray="364.4"
+                  id="ring-circle"
+                  stroke-dashoffset="364.4"
+                />
+              </svg>
+              <div class="score-ring-text">
+                <div class="ring-pct" id="ring-pct">0%</div>
+                <div class="ring-sub">ACCURACY</div>
+              </div>
+            </div>
+          </div>
+          <div class="score-display" id="result-score">
+            <span id="res-correct">0</span> / 50
+          </div>
+          <div class="score-label">questions answered correctly</div>
+          <div class="verdict" id="verdict-text"></div>
+          <div class="verdict-sub" id="verdict-sub"></div>
+          <div class="stat-grid">
+            <div class="stat-box">
+              <div class="stat-val c" id="stat-correct">0</div>
+              <div class="stat-lbl">CORRECT</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-val w" id="stat-wrong">0</div>
+              <div class="stat-lbl">WRONG</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-val a" id="stat-pct">0%</div>
+              <div class="stat-lbl">SCORE %</div>
+            </div>
+          </div>
+          <button class="btn-restart-big" onclick="restartQuiz()">
+            ↺ PLAY AGAIN
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const ALL_QUESTIONS = [
+        // ── PACKET SNIFFING ─────────────────────────────────────────────────────────
+        {
+          cat: "PACKET SNIFFING",
+          q: "What is packet sniffing?",
+          opts: [
+            "A method of encrypting data over a network",
+            "Capturing packets transmitted over a network",
+            "A firewall configuration technique",
+            "A wireless signal booster protocol",
+          ],
+          ans: 1,
+        },
+        {
+          cat: "PACKET SNIFFING",
+          q: "Which tool is a free and open-source packet analyser used for network troubleshooting and analysis?",
+          opts: ["Nmap", "Metasploit", "Wireshark", "Burp Suite"],
+          ans: 2,
+        },
+        {
+          cat: "PACKET SNIFFING",
+          q: "What does promiscuous mode on a network interface allow Wireshark to do?",
+          opts: [
+            "Encrypt all captured packets",
+            "Capture only packets destined for your own system",
+            "Capture all packets on the network, not just those for your system",
+            "Block malicious traffic automatically",
+          ],
+          ans: 2,
+        },
+        {
+          cat: "PACKET SNIFFING",
+          q: "At which OSI layer does ARP operate?",
+          opts: [
+            "Layer 3 — Network",
+            "Layer 1 — Physical",
+            "Layer 4 — Transport",
+            "Layer 2 — Data Link",
+          ],
+          ans: 3,
+        },
+        {
+          cat: "PACKET SNIFFING",
+          q: "In Wireshark, captured packets can be filtered according to which of the following?",
+          opts: [
+            "Protocol, IP, and method",
+            "Only IP addresses",
+            "Only port numbers",
+            "Only MAC addresses",
+          ],
+          ans: 0,
+        },
+        {
+          cat: "PACKET SNIFFING",
+          q: "What type of risk level did the SICSR audit plan assign to packet sniffing?",
+          opts: ["Low", "Medium", "Critical", "High"],
+          ans: 3,
+        },
+        {
+          cat: "PACKET SNIFFING",
+          q: "Which of the following is NOT listed as a use of packet sniffers?",
+          opts: [
+            "Capturing clear-text usernames and passwords",
+            "Mapping a network",
+            "Converting network traffic into human-readable form",
+            "Encrypting sensitive data at rest",
+          ],
+          ans: 3,
+        },
+        {
+          cat: "PACKET SNIFFING",
+          q: "Which sniffing method works by filtering all packets matching the MAC address?",
+          opts: [
+            "IP-Based Sniffing",
+            "ARP-Based Sniffing",
+            "DNS-Based Sniffing",
+            "MAC-Based Sniffing",
+          ],
+          ans: 3,
+        },
+        // ── ARP POISONING ───────────────────────────────────────────────────────────
+        {
+          cat: "ARP POISONING",
+          q: "What does ARP stand for?",
+          opts: [
+            "Advanced Routing Protocol",
+            "Address Resolution Protocol",
+            "Authenticated Relay Process",
+            "Automatic Routing Procedure",
+          ],
+          ans: 1,
+        },
+        {
+          cat: "ARP POISONING",
+          q: "ARP Spoofing sends falsified ARP messages over which type of network?",
+          opts: [
+            "Wide Area Network (WAN)",
+            "Local Area Network (LAN)",
+            "Virtual Private Network (VPN)",
+            "Cellular Network",
+          ],
+          ans: 1,
+        },
+        {
+          cat: "ARP POISONING",
+          q: "What is the main goal of ARP Spoofing?",
+          opts: [
+            "To increase network bandwidth",
+            "To link an attacker's MAC address with a legitimate IP address",
+            "To encrypt all traffic on the network",
+            "To block all inbound connections to a router",
+          ],
+          ans: 1,
+        },
+        {
+          cat: "ARP POISONING",
+          q: "Which tool is described as 'very easy and handy for beginners' to perform ARP poisoning?",
+          opts: ["Wireshark", "Nmap", "Cain and Abel", "Ettercap"],
+          ans: 2,
+        },
+        {
+          cat: "ARP POISONING",
+          q: "What type of attack uses ARP spoofing to intercept and modify traffic between victims?",
+          opts: [
+            "DoS Attack",
+            "Session Hijacking",
+            "Man-in-the-Middle (MitM) Attack",
+            "Replay Attack",
+          ],
+          ans: 2,
+        },
+        {
+          cat: "ARP POISONING",
+          q: "In a DoS attack that leverages ARP spoofing, what happens to the victim's MAC address?",
+          opts: [
+            "It is blocked from the network",
+            "Multiple IP addresses are linked to a single target MAC, overloading it with traffic",
+            "It is replaced with a fake MAC",
+            "It is encrypted to prevent access",
+          ],
+          ans: 1,
+        },
+        {
+          cat: "ARP POISONING",
+          q: "Which Cisco feature helps prevent ARP poisoning by intercepting all ARP requests and verifying their authenticity?",
+          opts: [
+            "VLAN Trunking Protocol (VTP)",
+            "Port Security",
+            "Dynamic ARP Inspection (DAI)",
+            "Spanning Tree Protocol (STP)",
+          ],
+          ans: 2,
+        },
+        {
+          cat: "ARP POISONING",
+          q: "Which of the following is listed as a packet sniffing tool?",
+          opts: ["Metasploit", "Kismet", "Hydra", "John the Ripper"],
+          ans: 1,
+        },
+        {
+          cat: "ARP POISONING",
+          q: "Adding a static ARP entry on a LAN is a way to prevent which attack?",
+          opts: [
+            "SQL Injection",
+            "ARP Spoofing",
+            "Brute Force Attack",
+            "Cross-Site Scripting",
+          ],
+          ans: 1,
+        },
+        // ── DENIAL OF SERVICE ───────────────────────────────────────────────────────
+        {
+          cat: "DENIAL OF SERVICE",
+          q: "What is the primary goal of a Denial of Service (DoS) attack?",
+          opts: [
+            "To steal data from a server",
+            "To gain unauthorised administrative access",
+            "To prevent legitimate users from accessing a service",
+            "To install spyware on victims' machines",
+          ],
+          ans: 2,
+        },
+        {
+          cat: "DENIAL OF SERVICE",
+          q: "What does a SYN Attack exploit?",
+          opts: [
+            "A vulnerability in DNS resolution",
+            "The TCP three-way handshake",
+            "A buffer overflow in a web server",
+            "A flaw in UDP header parsing",
+          ],
+          ans: 1,
+        },
+        {
+          cat: "DENIAL OF SERVICE",
+          q: "A Buffer Overflow attack occurs when a program writes more information into a buffer than it has allocated. What can an attacker do with this?",
+          opts: [
+            "Increase network bandwidth",
+            "Hijack control of the program to execute attacker's code",
+            "Only crash the program without further access",
+            "Decrypt encrypted data",
+          ],
+          ans: 1,
+        },
+        {
+          cat: "DENIAL OF SERVICE",
+          q: "What type of DoS attack sends ICMP echo traffic to a broadcast address with a spoofed source IP?",
+          opts: [
+            "Teardrop Attack",
+            "SYN Flood",
+            "Smurf Attack",
+            "Ping of Death",
+          ],
+          ans: 2,
+        },
+        {
+          cat: "DENIAL OF SERVICE",
+          q: "A Teardrop attack puts a confusing offset value in IP fragments. What is the result on a vulnerable OS?",
+          opts: [
+            "The OS gains extra memory",
+            "The OS can crash the system",
+            "The OS sends the attacker all fragmented data",
+            "The OS permanently blocks the attacker's IP",
+          ],
+          ans: 1,
+        },
+        {
+          cat: "DENIAL OF SERVICE",
+          q: "What is an IRCbot (also called zombie or drone) used for in DDoS attacks?",
+          opts: [
+            "Encrypting bot communications",
+            "Hosting legitimate web services",
+            "Receiving commands from an attacker via IRC to launch attacks",
+            "Scanning for open ports on a network",
+          ],
+          ans: 2,
+        },
+        {
+          cat: "DENIAL OF SERVICE",
+          q: "A botnet of 1,000 home PCs each with 128 KBit/s upstream can offer approximately how much combined bandwidth?",
+          opts: ["1 MBit/s", "10 MBit/s", "100 MBit/s", "1 GBit/s"],
+          ans: 2,
+        },
+        {
+          cat: "DENIAL OF SERVICE",
+          q: "In a DDoS attack, the term 'secondary victims' refers to which of the following?",
+          opts: [
+            "The ISPs that carry the attack traffic",
+            "The final target whose service is disrupted",
+            "Compromised systems used to launch the attack",
+            "Law enforcement agencies investigating the attack",
+          ],
+          ans: 2,
+        },
+        {
+          cat: "DENIAL OF SERVICE",
+          q: "Which DDoS mitigation method sets up routers with logic to adjust incoming traffic to safe levels?",
+          opts: [
+            "Honeypots",
+            "Load Balancing",
+            "Throttling",
+            "Deep Packet Inspection",
+          ],
+          ans: 2,
+        },
+        {
+          cat: "DENIAL OF SERVICE",
+          q: "A Honeypot in the context of deflecting DoS attacks is best described as:",
+          opts: [
+            "A firewall rule that blocks all ICMP traffic",
+            "A system set up with limited security to lure and study attackers",
+            "A type of encrypted tunnel for secure communications",
+            "A load balancer that distributes incoming requests",
+          ],
+          ans: 1,
+        },
+        // ── WIRELESS / HACKING ──────────────────────────────────────────────────────
+        {
+          cat: "WIRELESS SECURITY",
+          q: "A White Hat Hacker is also known as:",
+          opts: [
+            "A cracker",
+            "An Ethical Hacker or Sneaker",
+            "A Grey Hat Hacker",
+            "A Script Kiddie",
+          ],
+          ans: 1,
+        },
+        {
+          cat: "WIRELESS SECURITY",
+          q: "Which type of hacker is described as 'skilled but sometimes acts legally and sometimes not'?",
+          opts: [
+            "White Hat Hacker",
+            "Black Hat Hacker",
+            "Grey Hat Hacker",
+            "Script Kiddie",
+          ],
+          ans: 2,
+        },
+        {
+          cat: "WIRELESS SECURITY",
+          q: "Keystroke logging (key logging) is a method of:",
+          opts: [
+            "Encrypting user input before it reaches a server",
+            "Capturing and recording user keystrokes",
+            "Filtering network packets by content",
+            "Monitoring CPU usage in real time",
+          ],
+          ans: 1,
+        },
+        {
+          cat: "WIRELESS SECURITY",
+          q: "In wireless sensor networks, which security goal ensures that received data is not altered in transit?",
+          opts: [
+            "Confidentiality",
+            "Authentication",
+            "Availability",
+            "Integrity",
+          ],
+          ans: 3,
+        },
+        {
+          cat: "WIRELESS SECURITY",
+          q: "Which wireless sensor network attack involves an adversary tunnelling packets from one point in a network to another and replaying them?",
+          opts: [
+            "Selective Forwarding",
+            "Jamming",
+            "Wormhole Attack",
+            "Collision Attack",
+          ],
+          ans: 2,
+        },
+        {
+          cat: "WIRELESS SECURITY",
+          q: "A Brute Force attack works by:",
+          opts: [
+            "Injecting malicious SQL queries into a database",
+            "Trying every possible code or password until the correct one is found",
+            "Exploiting unpatched software vulnerabilities",
+            "Intercepting packets on a wireless network",
+          ],
+          ans: 1,
+        },
+        {
+          cat: "WIRELESS SECURITY",
+          q: "Email Spoofing is associated with which of the following social engineering techniques?",
+          opts: [
+            "Man-in-the-Middle attack",
+            "Phishing",
+            "DNS Poisoning",
+            "Session Hijacking",
+          ],
+          ans: 1,
+        },
+        {
+          cat: "WIRELESS SECURITY",
+          q: "What does Non-Repudiation in wireless sensor network security mean?",
+          opts: [
+            "A node can always deny sending a message",
+            "Data is recent and no old messages are replayed",
+            "A node cannot deny sending a message it previously sent",
+            "Only authorised nodes can access network services",
+          ],
+          ans: 2,
+        },
+        {
+          cat: "WIRELESS SECURITY",
+          q: "A Jamming attack in wireless networks interferes with radio frequencies. What is one suggested solution?",
+          opts: [
+            "MAC address filtering",
+            "Frequency hopping and code spreading",
+            "Installing a hardware firewall",
+            "Using static IP addresses",
+          ],
+          ans: 1,
+        },
+        // ── DARK WEB / TOR ──────────────────────────────────────────────────────────
+        {
+          cat: "DARK WEB & TOR",
+          q: "The 'iceberg' model of the web places the Dark Web:",
+          opts: [
+            "Above the Surface Web",
+            "At the same level as the Surface Web",
+            "Below the Deep Web",
+            "As a synonym for the Deep Web",
+          ],
+          ans: 2,
+        },
+        {
+          cat: "DARK WEB & TOR",
+          q: "Which of the following is a characteristic of the Deep Web (NOT the Dark Web)?",
+          opts: [
+            "Requires special access software",
+            "Associated with illegal activities by definition",
+            "Protected by an authentication layer or paywall",
+            "Completely anonymous to all users",
+          ],
+          ans: 2,
+        },
+        {
+          cat: "DARK WEB & TOR",
+          q: "The Tor Project was originally developed by which organization?",
+          opts: [
+            "DARPA",
+            "The FBI",
+            "The US Naval Research Laboratory",
+            "MIT Lincoln Laboratory",
+          ],
+          ans: 2,
+        },
+        {
+          cat: "DARK WEB & TOR",
+          q: "Tor hidden services use special addresses ending in which domain suffix?",
+          opts: [".deep", ".tor", ".hidden", ".onion"],
+          ans: 3,
+        },
+        {
+          cat: "DARK WEB & TOR",
+          q: "In 2013, the FBI infiltrated 'Freedom Hosting' by inserting an exploit that targeted a vulnerability in which browser?",
+          opts: [
+            "Chrome 28",
+            "Internet Explorer 11",
+            "Safari 7",
+            "Firefox 17 (used in Tor browser)",
+          ],
+          ans: 3,
+        },
+        {
+          cat: "DARK WEB & TOR",
+          q: "The Silk Road dark web marketplace was reportedly identified by law enforcement through which oversight?",
+          opts: [
+            "A misconfigured exit node",
+            "A non-anonymized CAPTCHA",
+            "An unencrypted email address",
+            "A leaked IRC log",
+          ],
+          ans: 1,
+        },
+        {
+          cat: "DARK WEB & TOR",
+          q: "The deep web is estimated to be approximately how many times larger than the surface web?",
+          opts: [
+            "10 to 20 times",
+            "50 to 100 times",
+            "400 to 500 times",
+            "1,000 to 2,000 times",
+          ],
+          ans: 2,
+        },
+        {
+          cat: "DARK WEB & TOR",
+          q: "Bitcoin transactions on the 'Welcome To Video' dark web site were used by investigators to do what?",
+          opts: [
+            "Encrypt child abuse material",
+            "Identify and arrest users",
+            "Fund undercover operations",
+            "Build a blockchain record of all dark web activity",
+          ],
+          ans: 1,
+        },
+        {
+          cat: "DARK WEB & TOR",
+          q: "Which of the following is listed as a LEGAL use of dark web services?",
+          opts: [
+            "Selling stolen credit card numbers",
+            "Hosting illegal marketplaces",
+            "Journalism and communication for repressed minorities",
+            "Distributing malware-as-a-service",
+          ],
+          ans: 2,
+        },
+        {
+          cat: "DARK WEB & TOR",
+          q: "Which country hosts the most Tor relay nodes according to the presentation?",
+          opts: ["USA", "France", "UK", "Germany"],
+          ans: 3,
+        },
+        // ── WEB DEVELOPMENT ─────────────────────────────────────────────────────────
+        {
+          cat: "WEB DEVELOPMENT",
+          q: "A web application is defined as one where some part of the application is hosted within:",
+          opts: [
+            "A desktop operating system",
+            "A mobile device",
+            "A web browser",
+            "A cloud database",
+          ],
+          ans: 2,
+        },
+        {
+          cat: "WEB DEVELOPMENT",
+          q: "An Intranet is best described as:",
+          opts: [
+            "A public-facing website accessible to all internet users",
+            "A private network using web technology accessible only to authorised persons",
+            "A type of cloud storage service",
+            "A protocol for encrypting web traffic",
+          ],
+          ans: 1,
+        },
+        {
+          cat: "WEB DEVELOPMENT",
+          q: "Static web pages are HTML files stored on a server. Dynamic web pages differ because they are:",
+          opts: [
+            "HTML files with extra images",
+            "Output from programs that run on web servers and can interact with databases",
+            "Pages that load faster due to caching",
+            "Encrypted HTML files requiring special plugins",
+          ],
+          ans: 1,
+        },
+        {
+          cat: "WEB DEVELOPMENT",
+          q: "Which of the following is NOT listed as a dynamic web technology in the slides?",
+          opts: ["ASP.NET", "PHP", "Ruby on Rails", "Swift"],
+          ans: 3,
+        },
+        {
+          cat: "WEB DEVELOPMENT",
+          q: "Why is it important to test a web page on multiple browsers?",
+          opts: [
+            "Because different browsers have different IP addresses",
+            "Because the same HTML tags can be displayed differently on different browsers",
+            "Because browsers use different programming languages to read CSS",
+            "Because each browser requires a separate SSL certificate",
+          ],
+          ans: 1,
+        },
+        {
+          cat: "WEB DEVELOPMENT",
+          q: "According to the slides, what percentage of the entire internet is estimated to be invisible web content?",
+          opts: ["50%", "75%", "90%", "96%"],
+          ans: 3,
+        },
+        {
+          cat: "WEB DEVELOPMENT",
+          q: "Content Management Systems (CMS) and Blog engines construct pages by combining database content with:",
+          opts: [
+            "Raw binary files",
+            "Machine learning models",
+            "HTML + CSS templates",
+            "Compiled Java bytecode",
+          ],
+          ans: 2,
+        },
+        {
+          cat: "WEB DEVELOPMENT",
+          q: "What must you do if you use someone else's web template, according to the slides?",
+          opts: [
+            "Pay a licensing fee every month",
+            "Never modify the template",
+            "Attribute it in the footer and within the HTML",
+            "Register it with a copyright authority",
+          ],
+          ans: 2,
+        },
+      ];
+
+      let questions = [];
+      let current = 0;
+      let score = 0;
+      let answered = false;
+
+      function shuffle(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+
+      function startQuiz() {
+        questions = shuffle(ALL_QUESTIONS).slice(0, 50);
+        current = 0;
+        score = 0;
+        answered = false;
+        document.getElementById("start-screen").style.display = "none";
+        document.getElementById("results-screen").style.display = "none";
+        document.getElementById("quiz-screen").style.display = "block";
+        renderQuestion();
+      }
+
+      function restartQuiz() {
+        startQuiz();
+      }
+
+      function confirmRestart() {
+        if (confirm("Restart the quiz? Your current progress will be lost.")) {
+          restartQuiz();
+        }
+      }
+
+      function renderQuestion() {
+        answered = false;
+        const q = questions[current];
+        const num = current + 1;
+
+        document.getElementById("q-counter").textContent =
+          `Q ${String(num).padStart(2, "0")} / 50`;
+        document.getElementById("score-live").textContent = `SCORE: ${score}`;
+        document.getElementById("progress-fill").style.width =
+          `${(num / 50) * 100}%`;
+        document.getElementById("cat-badge").textContent = q.cat;
+        document.getElementById("question-text").textContent = q.q;
+        document.getElementById("feedback-area").innerHTML = "";
+        document.getElementById("btn-next").disabled = true;
+
+        const letters = ["A", "B", "C", "D"];
+        const grid = document.getElementById("options-grid");
+        grid.innerHTML = "";
+
+        // Shuffle options but track the correct answer index
+        const indices = [0, 1, 2, 3];
+        const shuffledIdx = shuffle(indices);
+        const newCorrectPos = shuffledIdx.indexOf(q.ans);
+
+        shuffledIdx.forEach((origIdx, pos) => {
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          btn.innerHTML = `<span class="opt-letter">${letters[pos]}</span>${q.opts[origIdx]}`;
+          btn.dataset.pos = pos;
+          btn.dataset.isCorrect = origIdx === q.ans ? "1" : "0";
+          btn.addEventListener("click", () =>
+            selectOption(pos, newCorrectPos, grid),
+          );
+          grid.appendChild(btn);
+        });
+      }
+
+      function selectOption(chosenPos, correctPos, grid) {
+        if (answered) return;
+        answered = true;
+
+        const btns = grid.querySelectorAll(".option-btn");
+        const isCorrect = parseInt(btns[chosenPos].dataset.isCorrect) === 1;
+
+        btns.forEach((b) => (b.disabled = true));
+        btns[correctPos].classList.add("correct");
+
+        const feedback = document.getElementById("feedback-area");
+        if (isCorrect) {
+          score++;
+          document.getElementById("score-live").textContent = `SCORE: ${score}`;
+          feedback.innerHTML = `<span class="feedback-icon">✓</span><span class="feedback-msg correct">CORRECT — well done!</span>`;
+        } else {
+          btns[chosenPos].classList.add("wrong");
+          const correctText = btns[correctPos].textContent.trim();
+          feedback.innerHTML = `<span class="feedback-icon">✗</span><span class="feedback-msg wrong">INCORRECT — The correct answer was: ${correctText.substring(1).trim()}</span>`;
+        }
+
+        document.getElementById("btn-next").disabled = false;
+      }
+
+      function nextQuestion() {
+        current++;
+        if (current >= 50) {
+          showResults();
+        } else {
+          renderQuestion();
+        }
+      }
+
+      function showResults() {
+        document.getElementById("quiz-screen").style.display = "none";
+        const results = document.getElementById("results-screen");
+        results.style.display = "block";
+
+        const pct = Math.round((score / 50) * 100);
+        document.getElementById("res-correct").textContent = score;
+        document.getElementById("stat-correct").textContent = score;
+        document.getElementById("stat-wrong").textContent = 50 - score;
+        document.getElementById("stat-pct").textContent = pct + "%";
+        document.getElementById("ring-pct").textContent = pct + "%";
+
+        // Animate ring
+        const circumference = 364.4;
+        const offset = circumference - (pct / 100) * circumference;
+        setTimeout(() => {
+          const circle = document.getElementById("ring-circle");
+          circle.style.transition = "stroke-dashoffset 1.2s ease";
+          circle.style.strokeDashoffset = offset;
+          if (pct >= 80) circle.style.stroke = "var(--correct)";
+          else if (pct >= 50) circle.style.stroke = "var(--accent)";
+          else circle.style.stroke = "var(--wrong)";
+        }, 100);
+
+        let verdict, sub;
+        if (pct === 100) {
+          verdict = "🏆 PERFECT SCORE";
+          sub = "Absolute mastery. Outstanding!";
+        } else if (pct >= 80) {
+          verdict = "✅ EXCELLENT";
+          sub = "Strong command of the material!";
+        } else if (pct >= 60) {
+          verdict = "👍 GOOD EFFORT";
+          sub = "Solid understanding, keep building on it.";
+        } else if (pct >= 40) {
+          verdict = "📚 NEEDS REVIEW";
+          sub = "Revisit the slides and try again.";
+        } else {
+          verdict = "⚠️ KEEP STUDYING";
+          sub = "Go back to the material and give it another shot!";
+        }
+
+        document.getElementById("verdict-text").textContent = verdict;
+        document.getElementById("verdict-sub").textContent = sub;
+      }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
